@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <WasmMainJSPath>main.js</WasmMainJSPath>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WasmAppDir>./dist</WasmAppDir>
+    <RunAOTCompilation>true</RunAOTCompilation> <!-- https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly?view=aspnetcore-6.0#ahead-of-time-aot-compilation  https://github.com/microsoft/fast-blazor/issues/214-->
+    <PublishTrimmed>true</PublishTrimmed> <!-- https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained -->
+    <TrimMode>full</TrimMode>
+    <!-- <WasmEnableThreads>true</WasmEnableThreads> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <WasmExtraFilesToDeploy Include="main.js" />
+    <WasmExtraFilesToDeploy Include="package.json" />
+    <WasmExtraFilesToDeploy Include="index.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.OpenApi.Kiota.Builder" Version="0.10.0-preview" />
+  </ItemGroup>
+
+</Project>

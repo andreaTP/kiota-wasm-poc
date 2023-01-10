@@ -1,0 +1,9 @@
+{
+    "name": "@dotnet/hello",
+    "type": "module",
+    "scripts": {
+        "clean": "rm -rf dist bin obj",
+        "build": "dotnet build --configuration Release",
+        "start": "(cd dist && python3 -m http.server)"
+    }
+}
