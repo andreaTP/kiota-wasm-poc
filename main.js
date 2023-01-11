@@ -8,8 +8,6 @@ const { getAssemblyExports, getConfig } = await dotnet
 const config = getConfig();
 const exports = await getAssemblyExports(config.mainAssemblyName);
 
-// const msg = await exports.KiotaJs.Generate("test");
-// console.log(msg);
 const data = await exports.KiotaJs.Generate("test");
 
 var element = document.createElement('a');
