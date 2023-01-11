@@ -39,7 +39,8 @@ public partial class KiotaJs
         }
         Directory.CreateDirectory(OutputPath);
 
-        if (!Enum.TryParse<GenerationLanguage>(language, out var parsedLanguage)) {
+        if (!Enum.TryParse<GenerationLanguage>(language, out var parsedLanguage))
+        {
             throw new ArgumentOutOfRangeException($"Not supported language: {language}");
         }
 
