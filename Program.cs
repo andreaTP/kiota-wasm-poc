@@ -20,6 +20,9 @@ public partial class KiotaJs
     private static readonly ThreadLocal<HashAlgorithm> HashAlgorithm = new(() => SHA256.Create());
     private static string DescriptionUrl = "https://raw.githubusercontent.com/microsoft/kiota/main/tests/Kiota.Builder.IntegrationTests/ToDoApi.yaml";
 
+    // DEBUG
+     private static readonly Kiota.Builder.Lock.LockManagementService lockManagementService = new();
+
     [JSExport]
     internal async static Task<string> Generate(string name)
     {
@@ -51,6 +54,7 @@ public partial class KiotaJs
             Serializers = defaultConfiguration.Serializers,
             Deserializers = defaultConfiguration.Deserializers,
             StructuredMimeTypes = defaultConfiguration.StructuredMimeTypes,
+            DisabledValidationRules = new(),
             CleanOutput = true,
             ClearCache = true,
         };
@@ -62,16 +66,7 @@ public partial class KiotaJs
         CancellationTokenSource source = new CancellationTokenSource();
         CancellationToken token = source.Token;
 
-        try
-        {
-            var result = await builder.GenerateClientAsync(token).ConfigureAwait(false);
-            // it's failing to write the final lock file ...
-        }
-        catch (Exception ex)
-        {
-            // TODO: it's failing to write the lock file need more investigation!
-            Console.WriteLine(ex.StackTrace);
-        }
+        var result = await builder.GenerateClientAsync(token).ConfigureAwait(false);
 
         var zipFilePath = Path.Combine(Path.GetTempPath(), "kiota", "clients", hashedUrl, "client.zip");
         if (File.Exists(zipFilePath))
@@ -81,7 +76,6 @@ public partial class KiotaJs
 
         ZipFile.CreateFromDirectory(OutputPath, zipFilePath);
 
-        // Return Base64???
         byte[] fileBytes = File.ReadAllBytes(zipFilePath);
         string base64Content = System.Convert.ToBase64String(fileBytes);
         return base64Content;
