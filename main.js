@@ -2,7 +2,7 @@ import { dotnet } from './dotnet.js'
 
 let exports;
 
-export async function generateOnElement(name, element) {
+export async function generateOnElement(element, url, language, clientClassName, namespaceName) {
     if (exports === undefined) {
         const { getAssemblyExports, getConfig } = await dotnet
         .withDiagnosticTracing(false)
@@ -14,10 +14,10 @@ export async function generateOnElement(name, element) {
     }
 
     try {
-        const data = await exports.KiotaJs.Generate(name);
+        const data = await exports.KiotaJs.Generate(url, language, clientClassName, namespaceName);
         // Base64 approach from: https://stackoverflow.com/a/51759464
         element.setAttribute('href', 'data:text/plain;base64,' + data);
-        element.download = 'kiota-test.zip';
+        element.download = `kiota-client-${language}.zip`;
         element.innerText = 'Download';
     } catch(e) {
         element.innerText = 'Error';
@@ -26,7 +26,3 @@ export async function generateOnElement(name, element) {
         console.error(e);
     }
 }
-
-var element = document.createElement('a');
-document.body.appendChild(element);
-generateOnElement("test", element);

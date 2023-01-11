@@ -1,0 +1,6 @@
+bin
+dist
+obj
+
+node_modules
+Dockerfile

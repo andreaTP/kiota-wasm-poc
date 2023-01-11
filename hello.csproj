@@ -17,6 +17,7 @@
     <WasmExtraFilesToDeploy Include="main.js" />
     <WasmExtraFilesToDeploy Include="package.json" />
     <WasmExtraFilesToDeploy Include="index.html" />
+    <WasmExtraFilesToDeploy Include="demo.js" />
   </ItemGroup>
 
   <ItemGroup>

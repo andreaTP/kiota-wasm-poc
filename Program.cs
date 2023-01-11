@@ -18,19 +18,18 @@ Console.WriteLine("Hello browser!");
 public partial class KiotaJs
 {
     private static readonly ThreadLocal<HashAlgorithm> HashAlgorithm = new(() => SHA256.Create());
-    private static string DescriptionUrl = "https://raw.githubusercontent.com/microsoft/kiota/main/tests/Kiota.Builder.IntegrationTests/ToDoApi.yaml";
-
-    // DEBUG
-     private static readonly Kiota.Builder.Lock.LockManagementService lockManagementService = new();
+    private static readonly ILogger<KiotaBuilder> consoleLogger = new ConsoleLogger();
+    private static readonly CancellationTokenSource source = new CancellationTokenSource();
+    private static readonly CancellationToken token = source.Token;
 
     [JSExport]
-    internal async static Task<string> Generate(string name)
+    internal async static Task<string> Generate(string url, string language, string clientClassName, string namespaceName)
     {
-        Console.WriteLine("Starting to Generate " + name);
+        Console.WriteLine($"Starting to Generate with parameters: {url}, {language}, {clientClassName}, {namespaceName}");
 
         var defaultConfiguration = new GenerationConfiguration();
 
-        var hashedUrl = BitConverter.ToString(HashAlgorithm.Value!.ComputeHash(Encoding.UTF8.GetBytes(DescriptionUrl))).Replace("-", string.Empty);
+        var hashedUrl = BitConverter.ToString(HashAlgorithm.Value!.ComputeHash(Encoding.UTF8.GetBytes(url))).Replace("-", string.Empty);
         string OutputPath = Path.Combine(Path.GetTempPath(), "kiota", "generation", hashedUrl);
 
         if (File.Exists(OutputPath))
@@ -40,15 +39,19 @@ public partial class KiotaJs
         }
         Directory.CreateDirectory(OutputPath);
 
+        if (!Enum.TryParse<GenerationLanguage>(language, out var parsedLanguage)) {
+            throw new ArgumentOutOfRangeException($"Not supported language: {language}");
+        }
+
         var generationConfiguration = new GenerationConfiguration
         {
-            OpenAPIFilePath = DescriptionUrl,
+            OpenAPIFilePath = url,
             IncludePatterns = defaultConfiguration.IncludePatterns,
             ExcludePatterns = defaultConfiguration.ExcludePatterns,
-            Language = GenerationLanguage.CSharp,
+            Language = parsedLanguage,
             OutputPath = OutputPath,
-            ClientClassName = "ApiClient",
-            ClientNamespaceName = "io.dummy",
+            ClientClassName = clientClassName,
+            ClientNamespaceName = namespaceName,
             IncludeAdditionalData = false,
             UsesBackingStore = false,
             Serializers = defaultConfiguration.Serializers,
@@ -59,12 +62,7 @@ public partial class KiotaJs
             ClearCache = true,
         };
 
-        var consoleLogger = new ConsoleLogger();
-
         var builder = new KiotaBuilder(consoleLogger, generationConfiguration, new HttpClient());
-
-        CancellationTokenSource source = new CancellationTokenSource();
-        CancellationToken token = source.Token;
 
         var result = await builder.GenerateClientAsync(token).ConfigureAwait(false);
 
@@ -96,7 +94,6 @@ class ConsoleLogger : ILogger<KiotaBuilder>
 
     void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        // dumb implementation
         Console.WriteLine(formatter(state, exception));
     }
 }
